@@ -30,15 +30,11 @@ import java_cup.runtime.Symbol;
       }
 %}
 
-%init{
-  super(in);
-%init}
-
 Identifier = [:jletter:] [:jletterdigit:]*
 
-SIP_URI                  =  "sip:" {userinfo}? // {hostport} {uri_parameters} {headers}?
+SIP_URI                  =  "sip:" {userinfo}? {hostport} {uri_parameters} {headers}?
  
-SIPS-URI               =  "sips:" {userinfo}? {hostport} {uri_parameters} {headers}?
+SIPS-URI                 =  "sips:" {userinfo}? {hostport} {uri_parameters} {headers}?
 
 // skipping telephone_subscriber part
 //userinfo               = ( {user} | {telephone_subscriber} ) ( ":" {password} )? "@"
@@ -54,20 +50,34 @@ HEXDIG                   = {DIGIT} | "A" | "B" | "C" | "D" | "E" | "F"
 ALPHA                    = [a-zA-Z]
 DIGIT                    = [0-9]
 
+hostport                 =  {host} ( ":" {port} )?
+host                     =  {hostname} | {IPv4address} | {IPv6reference}
+hostname                 =  ( {domainlabel} "." )* {toplabel} (".")?
+domainlabel              =  {alphanum} | {alphanum} ( {alphanum} | "-" )* {alphanum}
+toplabel                 =  {ALPHA} | {ALPHA} ( {alphanum} | "-" )* {alphanum}
 
+uri_parameters           =  ( ";" {uri_parameter})*
+uri_parameter            =  {transport_param} | {user_param} | {method_param} | {ttl_param} | {maddr_param} | {lr_param} | {other_param}
+transport_param          =  "transport=" ("udp" | "tcp" | "sctp" | "tls" | {other_transport})
+other_transport          =  {token}
+user_param               =  "user=" ( "phone" | "ip" | {other_user})
+other_user               =  {token}
+method_param             =  "method=" {Method}
+ttl_param                =  "ttl=" {ttl}
+maddr_param              =  "maddr=" {host}
+lr_param                 =  "lr"
+other_param              =  {pname} ( "=" {pvalue} )?
+pname                    =  {paramchar}+
+pvalue                   =  {paramchar}+
+paramchar                =  {param_unreserved} | {unreserved} | {escaped}
+param_unreserved         =  "[" | "]" | "/" | ":" | "&" | "+" | "$"
 
-hostport = {Identifier}
-uri_parameters = {Identifier}
-headers = {Identifier}
+headers                  =  "?" {header} ( "&" {header} )*
+header                   =  {hname} "=" {hvalue}
+hname                    =  ( {hnv_unreserved} | {unreserved} | {escaped} )+
+hvalue                   =  ( {hnv_unreserved} | {unreserved} | {escaped} )*
+hnv-unreserved           =  "[" | "]" | "/" | "?" | ":" | "+" | "$"
 
-
-//
-////hostport         =  host [ ":" port ]
-//host             =  hostname / IPv4address / IPv6reference
-//hostname         =  *( domainlabel "." ) toplabel [ "." ]
-//domainlabel      =  alphanum
-//                    / alphanum *( alphanum / "-" ) alphanum
-//toplabel         =  ALPHA / ALPHA *( alphanum / "-" ) alphanum
 
 %%
 
