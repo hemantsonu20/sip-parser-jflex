@@ -78,6 +78,13 @@ hname                    =  ( {hnv_unreserved} | {unreserved} | {escaped} )+
 hvalue                   =  ( {hnv_unreserved} | {unreserved} | {escaped} )*
 hnv-unreserved           =  "[" | "]" | "/" | "?" | ":" | "+" | "$"
 
+IPv4address              =  {DIGIT}{1,3} "." {DIGIT}{1,3} "." {DIGIT}{1,3} "." {DIGIT}{1,3}
+IPv6reference            =  "[" {IPv6address} "]"
+IPv6address              =  {hexpart} ( ":" {IPv4address} )?
+hexpart                  =  {hexseq} | ({hexseq} "::" {hexseq}?) | "::" {hexseq}?
+hexseq                   =  {hex4} ( ":" {hex4})*
+hex4                     =  {HEXDIG}{1,4}
+port                     =  {DIGIT}+
 
 %%
 
