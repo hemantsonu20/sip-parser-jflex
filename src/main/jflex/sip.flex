@@ -1,11 +1,11 @@
-package com.github.sip.parser;
+package jflex;
 
+import java.io.IOException;
 import java_cup.sym;
 import java_cup.runtime.Symbol;
 
-
 /**
-* A simple Lexer class to parse sip headers
+* A simple Lexer class to validate sip uri
 * References
 *
 * 1. https://www.ietf.org/rfc/rfc3261.txt
@@ -19,22 +19,19 @@ import java_cup.runtime.Symbol;
 %cup
 %line
 %column
+%public
 
 %{
 
-      private Symbol symbol(int type) {
-        return new Symbol(type, yyline, yycolumn);
-      }
       private Symbol symbol(int type, Object value) {
       	return new Symbol(type, yyline, yycolumn, value);
       }
 %}
 
-Identifier = [:jletter:] [:jletterdigit:]*
 
-SIP_URI                  =  "sip:" {userinfo}? {hostport} {uri_parameters} {headers}?
- 
-SIPS-URI                 =  "sips:" {userinfo}? {hostport} {uri_parameters} {headers}?
+SIP_URI                  =  "sip:" {CORE_URI}
+SIPS_URI                 =  "sips:" {CORE_URI}
+CORE_URI                 = {userinfo}? {hostport} {uri_parameters} {headers}?
 
 // skipping telephone_subscriber part
 //userinfo               = ( {user} | {telephone_subscriber} ) ( ":" {password} )? "@"
@@ -53,8 +50,8 @@ DIGIT                    = [0-9]
 hostport                 =  {host} ( ":" {port} )?
 host                     =  {hostname} | {IPv4address} | {IPv6reference}
 hostname                 =  ( {domainlabel} "." )* {toplabel} (".")?
-domainlabel              =  {alphanum} | {alphanum} ( {alphanum} | "-" )* {alphanum}
-toplabel                 =  {ALPHA} | {ALPHA} ( {alphanum} | "-" )* {alphanum}
+domainlabel              =  {alphanum} | ({alphanum} ( {alphanum} | "-" )* {alphanum})
+toplabel                 =  {ALPHA} | ({ALPHA} ( {alphanum} | "-" )* {alphanum})
 
 uri_parameters           =  ( ";" {uri_parameter})*
 uri_parameter            =  {transport_param} | {user_param} | {method_param} | {ttl_param} | {maddr_param} | {lr_param} | {other_param}
@@ -71,12 +68,18 @@ pname                    =  {paramchar}+
 pvalue                   =  {paramchar}+
 paramchar                =  {param_unreserved} | {unreserved} | {escaped}
 param_unreserved         =  "[" | "]" | "/" | ":" | "&" | "+" | "$"
+token                    =  ({alphanum} | "-" | "." | "!" | "%" | "*" | "_" | "+" | "`" | "'" | "~" )+
+ttl                      =  {DIGIT}{1,3}
+Method                   =  "INVITE" | "ACK" | "OPTIONS" | "BYE" | "CANCEL" | "REGISTER" | {extension_method}
+extension_method         =  {token}
+
+
 
 headers                  =  "?" {header} ( "&" {header} )*
 header                   =  {hname} "=" {hvalue}
 hname                    =  ( {hnv_unreserved} | {unreserved} | {escaped} )+
 hvalue                   =  ( {hnv_unreserved} | {unreserved} | {escaped} )*
-hnv-unreserved           =  "[" | "]" | "/" | "?" | ":" | "+" | "$"
+hnv_unreserved           =  "[" | "]" | "/" | "?" | ":" | "+" | "$"
 
 IPv4address              =  {DIGIT}{1,3} "." {DIGIT}{1,3} "." {DIGIT}{1,3} "." {DIGIT}{1,3}
 IPv6reference            =  "[" {IPv6address} "]"
@@ -88,6 +91,9 @@ port                     =  {DIGIT}+
 
 %%
 
-<YYINITIAL> {SIP_URI}              { return symbol(sym.ID, yytext()); }
+<YYINITIAL> {
+  {SIP_URI}                 { return symbol(sym.ID, yytext()); }
+  {SIPS_URI}                { return symbol(sym.ID, yytext()); }
+}
 
-[^]                              { throw new Error("Illegal character <"+ yytext()+ ">"); }
+[^]                              { throw new IOException("Illegal character <"+ yytext()+ ">"); }

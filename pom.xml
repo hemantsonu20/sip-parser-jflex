@@ -15,6 +15,7 @@
 		<testng.version>6.9.9</testng.version>
 		<mvn.compiler.version>3.3</mvn.compiler.version>
 		<java.cup.version>11a</java.cup.version>
+		<jflex.version>1.6.1</jflex.version>
 	</properties>
 
 	<parent>
@@ -42,10 +43,10 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/hemantsonu20/java-util</connection>
-		<developerConnection>scm:git:git@github.com/hemantsonu20/java-util</developerConnection>
+		<connection>scm:git:git://github.com/hemantsonu20/sip-parser.git</connection>
+		<developerConnection>scm:git:git@github.com:hemantsonu20/sip-parser.git</developerConnection>
 		<tag>${project.version}</tag>
-		<url>https://github.com/hemantsonu20/java-util</url>
+		<url>https://github.com/hemantsonu20/sip-parser</url>
 	</scm>
 
 	<dependencies>
@@ -63,31 +64,31 @@
 	</dependencies>
 
 	<build>
-		<plugins>
-			<!-- Eclipse project -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.10</version>
-				<configuration>
-					<!-- Always download and attach dependencies source code -->
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>true</downloadJavadocs>
-					<!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
-					<wtpversion>2.0</wtpversion>
-				</configuration>
-			</plugin>
-			<!-- Set JDK Compiler Level -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${mvn.compiler.version}</version>
-				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
-		</plugins>
+			<plugins>
+				<!-- Set JDK Compiler Level -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${mvn.compiler.version}</version>
+					<configuration>
+						<source>${jdk.version}</source>
+						<target>${jdk.version}</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>de.jflex</groupId>
+					<artifactId>jflex-maven-plugin</artifactId>
+					<version>${jflex.version}</version>
+					<executions>
+						<execution>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>generate</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
 	</build>
 
 </project>
