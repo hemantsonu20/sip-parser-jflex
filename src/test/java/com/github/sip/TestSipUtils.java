@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 import com.github.sip.SipUtils;
 
-public class TestSipLexer {
+public class TestSipUtils {
 
     @Test
     public void testSipUriWithHostName() {
